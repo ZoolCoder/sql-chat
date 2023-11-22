@@ -9,6 +9,7 @@ import de.sql.chat.localization.LocalizedResourceManager;
  * This class provides the capability to handle application-specific errors using error codes and localized error messages.
  *
  * @since 8-11-2023
+ * @author Abdallah Emad
  */
 public class ChatAppException extends Exception {
   private final ErrorCode errorCode;

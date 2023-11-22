@@ -14,6 +14,7 @@ import java.net.*;
  * and initiates a chat session.
  *
  * @since 8-11-2023
+ * @author Abdallah Emad
  */
 public class ChatClient {
   private String serverIP;
@@ -36,6 +37,7 @@ public class ChatClient {
    * Starts the chat client by establishing a connection to the server and
    * initiating a chat session.
    *
+   * @param userInputSource The source of user input for the chat session.
    * @throws ChatAppException If an error occurs during client setup.
    */
   public void start(UserInputSource userInputSource) throws ChatAppException {
@@ -104,7 +106,12 @@ public class ChatClient {
     return clientSocket;
   }
 
-  public void sendMessage(String hello) {
-    this.clientSession.sendMessage(hello);
+  /**
+   * Sends a message to the chat server through the client session.
+   *
+   * @param message The message to be sent.
+   */
+  public void sendMessage(String message) {
+    this.clientSession.sendMessage(message);
   }
 }

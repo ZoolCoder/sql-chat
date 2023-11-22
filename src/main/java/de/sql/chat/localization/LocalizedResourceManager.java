@@ -5,7 +5,7 @@ import java.util.*;
 
 /**
  * The LocalizedResourceManager class is responsible for managing and retrieving localized messages from resource bundles.
- * It provides methods to get messages from a specific resource bundle, format messages with arguments, and set the locale for the resource bundle.
+ * It provides methods to get messages from a specific resource bundle, format messages with arguments, and manage the current locale.
  *
  * @since 8-11-2023
  * @author Abdallah Emad

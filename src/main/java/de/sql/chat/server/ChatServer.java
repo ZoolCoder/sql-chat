@@ -14,10 +14,11 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 /**
- * Represents a chat server that accepts client connections.
- * The server listens on a random port for incoming client connections.
+ * The ChatServer class represents a server that handles incoming client connections
+ * and initiates chat sessions with the clients.
  *
  * @since 8-11-2023
+ * @author Abdallah Emad
  */
 public class ChatServer {
   private ServerSocket serverSocket;
@@ -25,10 +26,12 @@ public class ChatServer {
   private String serverIP;
   private int serverPort;
   private ChatSession serverSession;
+
   /**
    * Starts the chat server by creating a server socket and waiting for
    * a single incoming client connection. Once a client connects, a chat session is initiated.
    *
+   * @param userInputSource The source of user input for the chat session.
    * @throws ChatAppException If an error occurs during server setup.
    */
   public void start(UserInputSource userInputSource) throws ChatAppException {
@@ -97,6 +100,11 @@ public class ChatServer {
     return serverPort;
   }
 
+  /**
+   * Returns the chat session associated with the server.
+   *
+   * @return The chat session associated with the server.
+   */
   public ChatSession getServerSession() {
     return serverSession;
   }

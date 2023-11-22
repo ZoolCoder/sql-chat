@@ -4,6 +4,7 @@ package de.sql.chat.session;
  * Enum representing the sender type (e.g., "Client" or "Server") for chat messages.
  *
  * @since 8-11-2023
+ * @author Abdallah Emad
  */
 public enum ChatSenderType {
   CLIENT("Client"),
