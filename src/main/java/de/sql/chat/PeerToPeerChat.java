@@ -5,7 +5,8 @@ import de.sql.chat.server.ChatServer;
 import de.sql.chat.exceptions.ChatAppException;
 import de.sql.chat.init.AppInitializer;
 import de.sql.chat.session.ScannerUserInputSource;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 /**
  * The main class for the Peer-to-Peer Chat application.
  * It handles command-line arguments and initiates the chat server or client accordingly.
@@ -14,9 +15,10 @@ import de.sql.chat.session.ScannerUserInputSource;
  * @since 8-11-2023
  */
 public class PeerToPeerChat {
+  private static final Logger LOGGER = LogManager.getLogger(PeerToPeerChat.class);
   public static void main(String[] args) {
     
-    // Initializes the application and retrieves the instance of the AppInitializer class.
+    // Initializes the application
     AppInitializer appInitializer = AppInitializer.getInstance();
     appInitializer.initialize();
     
@@ -38,6 +40,7 @@ public class PeerToPeerChat {
         startServer();
       }
     } catch (ChatAppException e) {
+      LOGGER.error("Chat Application Error: {}", e.getMessage());
       System.err.println("Chat Application Error: " + e.getMessage());
     }
   }
@@ -50,6 +53,7 @@ public class PeerToPeerChat {
    * @throws ChatAppException If an error occurs during client setup.
    */
   private static void startClient(String serverIP, int serverPort) throws ChatAppException {
+    LOGGER.info("Starting chat client with server IP: {} and port: {}", serverIP, serverPort);
     new ChatClient(serverIP, serverPort).start(new ScannerUserInputSource());
   }
 
@@ -59,6 +63,7 @@ public class PeerToPeerChat {
    * @throws ChatAppException If an error occurs during server setup.
    */
   private static void startServer() throws ChatAppException {
+    LOGGER.info("Starting chat server");
     new ChatServer().start(new ScannerUserInputSource());
   }
 }

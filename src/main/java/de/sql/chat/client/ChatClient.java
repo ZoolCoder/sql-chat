@@ -6,8 +6,11 @@ import de.sql.chat.session.ChatSenderType;
 import de.sql.chat.session.ChatSession;
 import de.sql.chat.session.ChatSessionFactory;
 import de.sql.chat.session.UserInputSource;
-import java.io.*;
-import java.net.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.net.Socket;
 
 /**
  * The ChatClient class represents a client that connects to a chat server
@@ -17,15 +20,17 @@ import java.net.*;
  * @author Abdallah Emad
  */
 public class ChatClient {
+
+  private static final Logger LOGGER = LogManager.getLogger(ChatClient.class);
   private String serverIP;
   private int serverPort;
   private ChatSession clientSession;
   private Socket clientSocket;
-  
+
   /**
    * Creates a new ChatClient instance with the specified server IP and port.
    *
-   * @param serverIP The IP address of the chat server.
+   * @param serverIP   The IP address of the chat server.
    * @param serverPort The port on which the server is listening.
    */
   public ChatClient(String serverIP, int serverPort) {
@@ -42,15 +47,19 @@ public class ChatClient {
    */
   public void start(UserInputSource userInputSource) throws ChatAppException {
     try {
+      LOGGER.info("Connecting to server {}:{}", serverIP, serverPort);
       clientSocket = new Socket(serverIP, serverPort);
+      LOGGER.info("Connected to server. You can start typing messages.");
+
       this.clientSession = ChatSessionFactory.createChatSession(ChatSenderType.CLIENT, clientSocket, userInputSource);
       System.out.println("Connected to server. You can start typing messages.");
       this.clientSession.start();
     } catch (IOException e) {
+      LOGGER.error("Error during client setup: {}", e.getMessage());
       throw new ChatAppException(ErrorCode.CLIENT_ERROR, "Client Error: " + e.getMessage());
     }
   }
-  
+
   /**
    * Closes the chat client by closing the chat session and disconnecting from the server.
    *
@@ -58,14 +67,21 @@ public class ChatClient {
    */
   public void close() throws ChatAppException {
     try {
+      LOGGER.info("Closing chat client...");
+
       // Close the chat session
-      clientSession.close();
+      if (clientSession != null) {
+        clientSession.close();
+      }
 
       // Close the client socket
-      clientSocket.close();
+      if (clientSocket != null && !clientSocket.isClosed()) {
+        clientSocket.close();
+      }
 
-      System.out.println("Disconnected from server.");
+      LOGGER.info("Chat client closed.");
     } catch (IOException e) {
+      LOGGER.error("Error during client shutdown: {}", e.getMessage());
       throw new ChatAppException(ErrorCode.CLIENT_ERROR, "Client Error: " + e.getMessage());
     }
   }
@@ -112,6 +128,7 @@ public class ChatClient {
    * @param message The message to be sent.
    */
   public void sendMessage(String message) {
+    LOGGER.debug("Sending message: {}", message);
     this.clientSession.sendMessage(message);
   }
 }

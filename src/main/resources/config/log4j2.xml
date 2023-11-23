@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration monitorInterval="30">
   <Appenders>
-    <Console name="STDOUT" target="SYSTEM_OUT">
-      <PatternLayout pattern="%d{dd-MM-yyyy [HH:mm:ss]} %-5level (%F:%L) [%t] - %m%n"/>
-    </Console>
-  </Appenders>
-  <Appenders>
-    <RollingFile name="LOGFILE" fileName="logs/app.log"
-                 filePattern="logs/app-%d{MM-dd-yyyy}-%i.log.gz">
-      <PatternLayout pattern="%d{dd-MM-yyyy [HH:mm:ss]} %-5level (%F:%L) [%t] - %m%n"/>
+    <!-- Rolling File Appender -->
+    <RollingFile name="RollingFile" fileName="logs/app.log"
+      filePattern="logs/app-%d{MM-dd-yyyy}-%i.log.gz">
+      <PatternLayout pattern="%d{dd-MM-yyyy HH:mm:ss} %-5level (%logger{36}:%L) [%t_%tid] - %msg%n"/>
       <Policies>
         <TimeBasedTriggeringPolicy />
         <SizeBasedTriggeringPolicy size="5 MB"/>
@@ -16,10 +12,15 @@
       <DefaultRolloverStrategy max="20"/>
     </RollingFile>
   </Appenders>
+
   <Loggers>
+    <!-- Logger for a specific package -->
+    <!--Logger name="de.sql.chat" level="debug"/-->
     <Logger name="org.apache.log4j.xml" level="info"/>
+
+    <!-- Root Logger -->
     <Root level="info">
-      <AppenderRef ref="LOGFILE"/>
+      <AppenderRef ref="RollingFile"/>
     </Root>
   </Loggers>
 </Configuration>
