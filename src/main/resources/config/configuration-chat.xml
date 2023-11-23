@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ReportConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ChatConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <Application>
-        <Name>server</Name>
-        <Local>En</Local>
+        <Name>server application</Name>
+        <Local>en</Local>
     </Application>
-</ReportConfiguration>
+</ChatConfiguration>
