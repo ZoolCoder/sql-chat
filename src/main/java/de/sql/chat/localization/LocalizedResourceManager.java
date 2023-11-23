@@ -2,6 +2,8 @@ package de.sql.chat.localization;
 
 import java.text.MessageFormat;
 import java.util.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The LocalizedResourceManager class is responsible for managing and retrieving localized messages from resource bundles.
@@ -11,6 +13,9 @@ import java.util.*;
  * @author Abdallah Emad
  */
 public class LocalizedResourceManager {
+
+    private static final Logger LOGGER = LogManager.getLogger(LocalizedResourceManager.class);
+
     private Map<LocalizationBundle, ResourceBundle> resourceBundles;
     private Locale currentLocale = Locale.getDefault();
     private static volatile LocalizedResourceManager instance;
@@ -51,7 +56,7 @@ public class LocalizedResourceManager {
             try {
                 return resourceBundle.getString(key);
             } catch (Exception e) {
-                // Handle the exception or log an error
+                LOGGER.error("Error getting message from bundle {} with key {}: {}", bundle, key, e.getMessage());
             }
         }
         return null;
@@ -74,7 +79,7 @@ public class LocalizedResourceManager {
                 formatter.setLocale(currentLocale);
                 return formatter.format(args);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error("Error formatting message from bundle {} with key {}: {}", bundle, key, e.getMessage());
             }
         }
         return null;
@@ -87,6 +92,7 @@ public class LocalizedResourceManager {
      */
     public void setLocale(Locale locale) {
         currentLocale = locale;
+        LOGGER.debug("Locale set to: {}", locale);
     }
 
     /**

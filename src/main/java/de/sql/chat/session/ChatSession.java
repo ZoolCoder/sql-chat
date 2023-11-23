@@ -7,7 +7,8 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 /**
  * Represents a chat session between a client and a server.
  * Implements the AutoCloseable interface to allow for automatic resource management.
@@ -16,6 +17,7 @@ import java.util.List;
  * @author Abdallah Emad
  */
 public class ChatSession implements AutoCloseable {
+    private static final Logger LOGGER = LogManager.getLogger(ChatSession.class);
     private final Socket socket;
     private final ChatSenderType sender;
     private final PrintWriter out;
@@ -41,6 +43,7 @@ public class ChatSession implements AutoCloseable {
             this.out = new PrintWriter(socket.getOutputStream(), true);
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (IOException e) {
+            LOGGER.error("Error creating session: {}", e.getMessage());
             throw new ChatAppException(
                     ErrorCode.SESSION_ERROR, "Error creating session: " + e.getMessage());
         }
@@ -63,7 +66,8 @@ public class ChatSession implements AutoCloseable {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOGGER.debug("Thread interrupted during sleep.");
+                    Thread.currentThread().interrupt();
                 }
             }
         } finally {
@@ -87,12 +91,13 @@ public class ChatSession implements AutoCloseable {
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
+                    LOGGER.debug("Thread interrupted during sleep.");
                     Thread.currentThread().interrupt();
                     return;
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Error reading user input: {}", e.getMessage());
         }
     }
 
@@ -115,7 +120,7 @@ public class ChatSession implements AutoCloseable {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Error reading received messages: {}", e.getMessage());
         }
     }
 
@@ -131,6 +136,7 @@ public class ChatSession implements AutoCloseable {
             out.println(sender + ": " + message);
             out.flush();
             userMessages.add(sender + ": " + message);
+            LOGGER.debug("Message sent: {}", message);
         }
     }
 
@@ -141,6 +147,7 @@ public class ChatSession implements AutoCloseable {
      */
     private void printMessage(String message) {
         System.out.println(message);
+        LOGGER.debug("Received message: {}", message);
     }
 
     /**
@@ -162,6 +169,7 @@ public class ChatSession implements AutoCloseable {
     @Override
     public void close() throws IOException {
         socket.close();
+        LOGGER.info("Chat session closed.");
     }
 
     /**

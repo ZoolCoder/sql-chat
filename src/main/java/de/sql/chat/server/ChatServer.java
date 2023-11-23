@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 /**
  * The ChatServer class represents a server that handles incoming client connections
  * and initiates chat sessions with the clients.
@@ -21,6 +23,8 @@ import java.net.Socket;
  * @author Abdallah Emad
  */
 public class ChatServer {
+
+  private static final Logger LOGGER = LogManager.getLogger(ChatServer.class);
   private ServerSocket serverSocket;
   private Socket clientSocket;
   private String serverIP;
@@ -42,6 +46,7 @@ public class ChatServer {
       ChatSession serverSession = ChatSessionFactory.createChatSession(ChatSenderType.SERVER, clientSocket, userInputSource);
       serverSession.start();
     } catch (IOException e) {
+      LOGGER.error("Error during server setup: {}", e.getMessage());
       throw new ChatAppException(ErrorCode.SERVER_ERROR, LocalizedResourceManager.getInstance().getMessage(LocalizationBundle.MESSAGES, "server.error") + ": " + e.getMessage());
     }
   }
@@ -56,6 +61,7 @@ public class ChatServer {
     this.serverIP = InetAddress.getLocalHost().getHostAddress();
     this.serverPort = serverSocket.getLocalPort();
     System.out.println(LocalizedResourceManager.getInstance().getFormattedMessage(LocalizationBundle.MESSAGES, "server.started", serverIP, serverPort));
+    LOGGER.info("Server started at {}:{}", serverIP, serverPort);
   }
 
   /**
@@ -66,19 +72,23 @@ public class ChatServer {
   private void acceptClientConnection() throws IOException {
     clientSocket = serverSocket.accept();
     System.out.println(LocalizedResourceManager.getInstance().getMessage(LocalizationBundle.MESSAGES, "server.connected"));
+    LOGGER.info("Client connected from {}:{}", clientSocket.getInetAddress().getHostAddress(), clientSocket.getPort());
   }
 
   /**
    * Closes the server socket and client socket.
-   *
-   * @throws IOException If an error occurs while closing the sockets.
    */
-  public void close() throws IOException {
-    if (clientSocket != null) {
-      clientSocket.close();
-    }
-    if (serverSocket != null) {
-      serverSocket.close();
+  public void close() {
+    try {
+      if (clientSocket != null) {
+        clientSocket.close();
+      }
+      if (serverSocket != null) {
+        serverSocket.close();
+        LOGGER.info("Server closed.");
+      }
+    } catch (IOException e) {
+      LOGGER.error("Error during server socket closure: {}", e.getMessage());
     }
   }
 
