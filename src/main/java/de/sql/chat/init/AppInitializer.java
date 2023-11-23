@@ -1,6 +1,6 @@
 package de.sql.chat.init;
 
-import de.sql.chat.configuration.ConfigurationManager;
+import de.sql.chat.config.ChatConfigurationAccess;
 import java.util.Locale;
 import de.sql.chat.localization.LocalizedResourceManager;
 
@@ -52,7 +52,8 @@ public class AppInitializer {
 
   private void initLocalization() {
     LOGGER.info("Initializing localization resources.");
-    LocalizedResourceManager.getInstance(new Locale(ConfigurationManager.getInstance().getChatConfiguration().getApplication().getLocal()));
+    LocalizedResourceManager.getInstance(new Locale(
+        ChatConfigurationAccess.getInstance().getChatConfiguration().getApplication().getLocal()));
     LOGGER.info("localization configuration initialized.");
   }
   private void initLog4j2() {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ChatConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ChatConfiguration xmlns="config.chat.sql.de" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="config.chat.sql.de chat-configuration.xsd" version="3.0">
     <Application>
-        <Name>server application</Name>
+        <Name>Server Application</Name>
         <Local>en</Local>
     </Application>
 </ChatConfiguration>

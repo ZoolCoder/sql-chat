@@ -1,4 +1,4 @@
-package de.sql.chat.configuration;
+package de.sql.chat.config;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
@@ -12,35 +12,35 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * The ConfigurationManager class is responsible for managing the application's configuration,
+ * The ChatConfigurationAccess class is responsible for managing the application's configuration,
  * specifically for the chat functionality. It follows the singleton pattern to ensure a single
  * instance throughout the application.
  *
  * @since 23-11-2023
  * @author Abdallah Emad
  */
-public class ConfigurationManager {
-  private static final Logger LOGGER = LogManager.getLogger(ConfigurationManager.class);
-  private static volatile ConfigurationManager instance;
+public class ChatConfigurationAccess {
+  private static final Logger LOGGER = LogManager.getLogger(ChatConfigurationAccess.class);
+  private static volatile ChatConfigurationAccess instance;
   private ChatConfiguration chatConfiguration;
 
   /**
    * Private constructor to enforce the singleton pattern.
    */
-  private ConfigurationManager() {
+  private ChatConfigurationAccess() {
     // Private constructor to enforce singleton pattern
   }
 
   /**
-   * Retrieves the singleton instance of the ConfigurationManager.
+   * Retrieves the singleton instance of the ChatConfigurationAccess.
    *
-   * @return The ConfigurationManager instance.
+   * @return The ChatConfigurationAccess instance.
    */
-  public static ConfigurationManager getInstance() {
+  public static ChatConfigurationAccess getInstance() {
     if (instance == null) {
-      synchronized (ConfigurationManager.class) {
+      synchronized (ChatConfigurationAccess.class) {
         if (instance == null) {
-          instance = new ConfigurationManager();
+          instance = new ChatConfigurationAccess();
         }
       }
     }
@@ -73,6 +73,7 @@ public class ConfigurationManager {
       // Unmarshal XML into Java object
       try (StringReader reader = new StringReader(xmlBody)) {
         chatConfiguration = (ChatConfiguration) unmarshaller.unmarshal(reader);
+        LOGGER.info("Unmarshalled ChatConfiguration: " + chatConfiguration);
       } catch (JAXBException e) {
         LOGGER.error("Error unmarshalling configuration", e);
       }
