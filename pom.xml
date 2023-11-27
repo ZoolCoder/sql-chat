@@ -14,6 +14,59 @@
     <app.version>1.0-SNAPSHOT</app.version>
   </properties>
 
+  <profiles>
+    <profile>
+      <id>sonar</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>0.8.10</version>
+            <executions>
+              <execution>
+                <id>agent-for-it</id>
+                <goals>
+                  <goal>prepare-agent-integration</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>agent-for-ut</id>
+                <goals>
+                  <goal>prepare-agent</goal>
+                </goals>
+              </execution>
+              <execution>
+                <id>jacoco-site</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <append>true</append>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <!-- Sonar -->
+        <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
+        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+        <sonar.language>java</sonar.language>
+        <sonar.java.source>17</sonar.java.source>
+        <sonar.login>test</sonar.login>
+        <sonar.password>test</sonar.password>
+        <!--sonar.token>test</sonar.token-->
+      </properties>
+    </profile>
+  </profiles>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
@@ -104,6 +157,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>jaxb2-maven-plugin</artifactId>
+        <version>3.1.0</version>
         <executions>
           <execution>
             <id>configuration-schema</id>
@@ -126,28 +180,10 @@
         </configuration>
       </plugin>
       <plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.10</version>
-				<executions>
-					<execution>
-						<id>default-prepare-agent</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>default-report</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-            <configuration>
-              <outputDirectory>${project.build.directory}/test-coverage-reports</outputDirectory>
-            </configuration>
-					</execution>
-				</executions>
-			</plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>3.10.0.2594</version>
+      </plugin>
     </plugins>
   </build>
 </project>

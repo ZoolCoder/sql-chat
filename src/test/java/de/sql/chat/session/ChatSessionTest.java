@@ -45,7 +45,7 @@ public class ChatSessionTest {
     }
 
     @Test
-    public void testChatSession() throws IOException, InterruptedException, ChatAppException {
+    void testChatSession() throws IOException, InterruptedException, ChatAppException {
       
         // / Start the chat session in a separate thread
         Thread chatSessionThread = new Thread(() -> {

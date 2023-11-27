@@ -43,7 +43,7 @@ public class ChatServer {
       setupServer();
       acceptClientConnection();
 
-      ChatSession serverSession = ChatSessionFactory.createChatSession(ChatSenderType.SERVER, clientSocket, userInputSource);
+      serverSession = ChatSessionFactory.createChatSession(ChatSenderType.SERVER, clientSocket, userInputSource);
       serverSession.start();
     } catch (IOException e) {
       LOGGER.error("Error during server setup: {}", e.getMessage());

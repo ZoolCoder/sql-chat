@@ -63,12 +63,7 @@ public class ChatSession implements AutoCloseable {
                 printReceivedMessages();
 
                 // Sleep for a short duration to avoid busy-waiting
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    LOGGER.debug("Thread interrupted during sleep.");
-                    Thread.currentThread().interrupt();
-                }
+                sleepForShortDuration(100);
             }
         } finally {
             userInputThread.interrupt();
@@ -88,13 +83,7 @@ public class ChatSession implements AutoCloseable {
                 }
 
                 // Sleep for a short duration to avoid busy-waiting
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    LOGGER.debug("Thread interrupted during sleep.");
-                    Thread.currentThread().interrupt();
-                    return;
-                }
+                sleepForShortDuration(100);
             }
         } catch (IOException e) {
             LOGGER.error("Error reading user input: {}", e.getMessage());
@@ -179,5 +168,14 @@ public class ChatSession implements AutoCloseable {
      */
     public List<String> getUserMessages() {
         return userMessages;
+    }
+
+    private void sleepForShortDuration(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            LOGGER.debug("Thread interrupted during sleep.");
+            Thread.currentThread().interrupt();
+        }
     }
 }

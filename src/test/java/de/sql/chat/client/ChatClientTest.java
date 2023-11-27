@@ -55,7 +55,7 @@ public class ChatClientTest {
     }
 
     @Test
-    public void testExit()  {
+    void testExit()  {
         // Send messages from the client
         chatClient.sendMessage("Hello");
         chatClient.sendMessage("How are you?");

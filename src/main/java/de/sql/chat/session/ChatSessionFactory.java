@@ -12,7 +12,11 @@ import java.net.Socket;
  * @author Abdallah Emad
  */
 public class ChatSessionFactory {
-  
+
+  private ChatSessionFactory() {
+    // Private constructor to prevent instantiation from outside the class.
+  }
+
   /**
   * Create a ChatSession with the specified sender type and socket.
   *
@@ -23,8 +27,7 @@ public class ChatSessionFactory {
   * @throws IOException If an I/O error occurs while creating the ChatSession.
   * @throws ChatAppException If an exception specific to the ChatApp occurs while creating the ChatSession.
   */
-  public static ChatSession createChatSession(ChatSenderType sender, Socket socket, UserInputSource userInputSource)
-      throws IOException, ChatAppException {
+  public static ChatSession createChatSession(ChatSenderType sender, Socket socket, UserInputSource userInputSource) throws ChatAppException {
 
     return new ChatSession(sender, socket, userInputSource);
   }

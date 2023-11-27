@@ -18,7 +18,7 @@ public class LocalizedResourceManager {
 
     private Map<LocalizationBundle, ResourceBundle> resourceBundles;
     private Locale currentLocale = Locale.getDefault();
-    private static volatile LocalizedResourceManager instance;
+    private static LocalizedResourceManager instance;
 
      // Private constructor to prevent instantiation
      private LocalizedResourceManager(Locale locale) {

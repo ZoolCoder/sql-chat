@@ -44,19 +44,19 @@ public class ChatServerTest {
   }
 
   @Test
-  public void testStart() throws ChatAppException {
+  void testStart() throws ChatAppException {
     assertTrue(clientSocket.isConnected());
   }
 
   @Test
-  public void testGetServerIP() {
+  void testGetServerIP() {
     String serverIP = chatServer.getServerIP();
     assertNotNull(serverIP);
     assertFalse(serverIP.isEmpty());
   }
 
   @Test
-  public void testGetServerPort() {
+  void testGetServerPort() {
     int serverPort = chatServer.getServerPort();
     assertTrue(serverPort > 0);
   }
