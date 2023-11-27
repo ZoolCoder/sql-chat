@@ -16,12 +16,12 @@ import org.apache.logging.log4j.Logger;
  */
 public class PeerToPeerChat {
   private static final Logger LOGGER = LogManager.getLogger(PeerToPeerChat.class);
-  public static void main(String[] args) {
+  public static void main(String[] args) throws ChatAppException {
     
     // Initializes the application
     AppInitializer appInitializer = AppInitializer.getInstance();
     appInitializer.initialize();
-    
+
     String otherInstanceIP = null;
     int otherInstancePort = 0;
 

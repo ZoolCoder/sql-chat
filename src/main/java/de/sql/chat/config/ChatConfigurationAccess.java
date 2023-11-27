@@ -1,15 +1,14 @@
 package de.sql.chat.config;
 
-import jakarta.xml.bind.JAXBContext;
+import de.sql.chat.exceptions.ChatAppException;
+import de.sql.chat.exceptions.ErrorCode;
+import de.sql.chat.util.XmlToObjectUtil;
 import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Unmarshaller;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The ChatConfigurationAccess class is responsible for managing the application's configuration,
@@ -21,7 +20,6 @@ import java.nio.file.Paths;
  */
 public class ChatConfigurationAccess {
   private static final Logger LOGGER = LogManager.getLogger(ChatConfigurationAccess.class);
-  private static volatile ChatConfigurationAccess instance;
   private ChatConfiguration chatConfiguration;
 
   /**
@@ -31,20 +29,12 @@ public class ChatConfigurationAccess {
     // Private constructor to enforce singleton pattern
   }
 
-  /**
-   * Retrieves the singleton instance of the ChatConfigurationAccess.
-   *
-   * @return The ChatConfigurationAccess instance.
-   */
+  private static class SingletonHolder {
+    private static final ChatConfigurationAccess INSTANCE = new ChatConfigurationAccess();
+  }
+
   public static ChatConfigurationAccess getInstance() {
-    if (instance == null) {
-      synchronized (ChatConfigurationAccess.class) {
-        if (instance == null) {
-          instance = new ChatConfigurationAccess();
-        }
-      }
-    }
-    return instance;
+    return SingletonHolder.INSTANCE;
   }
 
   /**
@@ -53,35 +43,16 @@ public class ChatConfigurationAccess {
    *
    * @return The ChatConfiguration instance.
    */
-  public ChatConfiguration getChatConfiguration() {
+  public ChatConfiguration getChatConfiguration() throws ChatAppException {
     if (chatConfiguration == null) {
-      loadConfiguration();
+      try {
+        String xmlBody = Files.readString(Paths.get(System.getProperty("user.dir") + "/config/configuration-chat.xml"));
+        chatConfiguration = new XmlToObjectUtil<>(xmlBody, ChatConfiguration.class).getTargetObject();
+      } catch (IOException | JAXBException e) {
+        LOGGER.error("Error during Initializing configuration", e);
+        throw new ChatAppException(ErrorCode.CONFIGURATION_ERROR, "configuration Error: " + e.getMessage());
+      }
     }
     return chatConfiguration;
   }
-
-  /**
-   * Loads the chat configuration from an XML file.
-   */
-  private void loadConfiguration() {
-    try {
-      String xmlBody = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/config/configuration-chat.xml")), "UTF-8");
-      // Create JAXB context and unmarshaller
-      JAXBContext jaxbContext = JAXBContext.newInstance(ChatConfiguration.class);
-      Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-
-      // Unmarshal XML into Java object
-      try (StringReader reader = new StringReader(xmlBody)) {
-        chatConfiguration = (ChatConfiguration) unmarshaller.unmarshal(reader);
-        LOGGER.info("Unmarshalled ChatConfiguration: " + chatConfiguration);
-      } catch (JAXBException e) {
-        LOGGER.error("Error unmarshalling configuration", e);
-      }
-    } catch (JAXBException e) {
-      LOGGER.error("Error creating JAXB context", e);
-    } catch (IOException e) {
-      LOGGER.error("Error reading configuration file", e);
-    }
-  }
-
 }

@@ -1,6 +1,7 @@
 package de.sql.chat.init;
 
 import de.sql.chat.config.ChatConfigurationAccess;
+import de.sql.chat.exceptions.ChatAppException;
 import java.util.Locale;
 import de.sql.chat.localization.LocalizedResourceManager;
 
@@ -20,29 +21,27 @@ import java.nio.file.Paths;
 public class AppInitializer {
 
     private static final Logger LOGGER = LogManager.getLogger(AppInitializer.class);
-    private static AppInitializer instance;
-
-    private AppInitializer() {
-        // Private constructor to prevent direct instantiation
-    }
 
     /**
-     * Retrieve the singleton instance of the application initializer.
-     *
-     * @return The singleton instance of AppInitializer
+     * Private constructor to enforce the singleton pattern.
      */
+    private AppInitializer() {
+      // Private constructor to enforce singleton pattern
+    }
+
+    private static class SingletonHolder {
+      private static final AppInitializer INSTANCE = new AppInitializer();
+    }
+
     public static AppInitializer getInstance() {
-      if (instance == null) {
-        instance = new AppInitializer();
-      }
-      return instance;
+      return AppInitializer.SingletonHolder.INSTANCE;
     }
 
     /**
      * Initializes the application by setting up the necessary components and resources.
      * This method should be called once at the start of the application.
      */
-    public void initialize() {
+    public void initialize() throws ChatAppException {
       // Initialize log4j2 configuration first to allow logging of other initialization steps
       initLog4j2();
       LOGGER.info("Starting application initialization...");
@@ -50,10 +49,10 @@ public class AppInitializer {
       LOGGER.info("Application initialization completed.");
     }
 
-  private void initLocalization() {
+  private void initLocalization() throws ChatAppException {
     LOGGER.info("Initializing localization resources.");
-    LocalizedResourceManager.getInstance(new Locale(
-        ChatConfigurationAccess.getInstance().getChatConfiguration().getApplication().getLocal()));
+    Locale locale = new Locale(ChatConfigurationAccess.getInstance().getChatConfiguration().getApplication().getLocal());
+    LocalizedResourceManager.getInstance(locale);
     LOGGER.info("localization configuration initialized.");
   }
   private void initLog4j2() {
