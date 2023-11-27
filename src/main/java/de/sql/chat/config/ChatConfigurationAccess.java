@@ -7,8 +7,6 @@ import jakarta.xml.bind.JAXBException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * The ChatConfigurationAccess class is responsible for managing the application's configuration,
@@ -19,8 +17,8 @@ import org.apache.logging.log4j.Logger;
  * @author Abdallah Emad
  */
 public class ChatConfigurationAccess {
-  private static final Logger LOGGER = LogManager.getLogger(ChatConfigurationAccess.class);
   private ChatConfiguration chatConfiguration;
+  private boolean useResourcePath = false;
 
   /**
    * Private constructor to enforce the singleton pattern.
@@ -46,13 +44,24 @@ public class ChatConfigurationAccess {
   public ChatConfiguration getChatConfiguration() throws ChatAppException {
     if (chatConfiguration == null) {
       try {
-        String xmlBody = Files.readString(Paths.get(System.getProperty("user.dir") + "/config/configuration-chat.xml"));
+        String xmlBody = Files.readString(Paths.get(getFilePath()));
         chatConfiguration = new XmlToObjectUtil<>(xmlBody, ChatConfiguration.class).getTargetObject();
       } catch (IOException | JAXBException e) {
-        LOGGER.error("Error during Initializing configuration", e);
         throw new ChatAppException(ErrorCode.CONFIGURATION_ERROR, "configuration Error: " + e.getMessage());
       }
     }
     return chatConfiguration;
+  }
+
+  public void enableResourcePath() {
+    this.useResourcePath = true;
+  }
+
+  protected String getFilePath() {
+    if (useResourcePath) {
+      return Paths.get("src/main/resources/config/configuration-chat.xml").toString();
+    }
+
+    return System.getProperty("user.dir") + "/config/configuration-chat.xml";
   }
 }

@@ -21,7 +21,7 @@ import java.nio.file.Paths;
 public class AppInitializer {
 
     private static final Logger LOGGER = LogManager.getLogger(AppInitializer.class);
-
+    private boolean useResourcePath = false;
     /**
      * Private constructor to enforce the singleton pattern.
      */
@@ -45,17 +45,22 @@ public class AppInitializer {
       // Initialize log4j2 configuration first to allow logging of other initialization steps
       initLog4j2();
       LOGGER.info("Starting application initialization...");
+
+      if (this.useResourcePath) {
+        ChatConfigurationAccess.getInstance().enableResourcePath();
+      }
+
       initLocalization();
       LOGGER.info("Application initialization completed.");
     }
 
-  private void initLocalization() throws ChatAppException {
+  protected void initLocalization() throws ChatAppException {
     LOGGER.info("Initializing localization resources.");
     Locale locale = new Locale(ChatConfigurationAccess.getInstance().getChatConfiguration().getApplication().getLocal());
     LocalizedResourceManager.getInstance(locale);
     LOGGER.info("localization configuration initialized.");
   }
-  private void initLog4j2() {
+  protected void initLog4j2() {
     Path configPath = Paths.get(System.getProperty("user.dir") + "/config/log4j2.xml");
     System.setProperty("log4j.configurationFile", configPath.toUri().toString());
 
@@ -65,4 +70,7 @@ public class AppInitializer {
     LOGGER.info("log4j2 configuration initialized.");
   }
 
+  protected void enableResourcePath() {
+    this.useResourcePath = true;
+  }
 }
