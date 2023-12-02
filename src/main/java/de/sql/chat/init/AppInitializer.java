@@ -20,46 +20,58 @@ import java.nio.file.Paths;
  */
 public class AppInitializer {
 
-    private static final Logger LOGGER = LogManager.getLogger(AppInitializer.class);
-    private boolean useResourcePath = false;
-    /**
-     * Private constructor to enforce the singleton pattern.
-     */
-    private AppInitializer() {
-      // Private constructor to enforce singleton pattern
-    }
+  private static final Logger LOGGER = LogManager.getLogger(AppInitializer.class);
+  
+  /**
+   * Private constructor to enforce the singleton pattern.
+   */
+  private AppInitializer() {
+    // Private constructor to enforce singleton pattern
+  }
 
-    private static class SingletonHolder {
-      private static final AppInitializer INSTANCE = new AppInitializer();
-    }
+  /**
+    * A holder class for the singleton instance of AppInitializer.
+    */
+  private static class SingletonHolder {
+    private static final AppInitializer INSTANCE = new AppInitializer();
+  }
 
-    public static AppInitializer getInstance() {
-      return AppInitializer.SingletonHolder.INSTANCE;
-    }
+  /**
+   * Returns the instance of the AppInitializer class.
+   *
+   * @return The instance of the AppInitializer class.
+   */
+  public static AppInitializer getInstance() {
+    return AppInitializer.SingletonHolder.INSTANCE;
+  }
 
-    /**
-     * Initializes the application by setting up the necessary components and resources.
-     * This method should be called once at the start of the application.
-     */
-    public void initialize() throws ChatAppException {
-      // Initialize log4j2 configuration first to allow logging of other initialization steps
-      initLog4j2();
-      LOGGER.info("Starting application initialization...");
+  /**
+   * Initializes the application by setting up the necessary components and resources.
+   * This method should be called once at the start of the application.
+   */
+  public void initialize() throws ChatAppException {
+    // Initialize log4j2 configuration first to allow logging of other initialization steps
+    initLog4j2();
+    LOGGER.info("Starting application initialization...");
 
-      if (this.useResourcePath) {
-        ChatConfigurationAccess.getInstance().enableResourcePath();
-      }
+    initLocalization();
+    LOGGER.info("Application initialization completed.");
+  }
 
-      initLocalization();
-      LOGGER.info("Application initialization completed.");
-    }
-
+  /**
+   * Initializes the localization resources for the chat application.
+   * @throws ChatAppException if an error occurs during initialization.
+   */
   protected void initLocalization() throws ChatAppException {
     LOGGER.info("Initializing localization resources.");
     Locale locale = new Locale(ChatConfigurationAccess.getInstance().getChatConfiguration().getApplication().getLocal());
     LocalizedResourceManager.getInstance(locale);
     LOGGER.info("localization configuration initialized.");
   }
+
+  /**
+   * Initializes the log4j2 configuration by setting the log4j2 configuration file path and reconfiguring the logger context.
+   */
   protected void initLog4j2() {
     Path configPath = Paths.get(System.getProperty("user.dir") + "/config/log4j2.xml");
     System.setProperty("log4j.configurationFile", configPath.toUri().toString());
@@ -68,9 +80,5 @@ public class AppInitializer {
     LoggerContext context = (LoggerContext) LogManager.getContext(false);
     context.reconfigure();
     LOGGER.info("log4j2 configuration initialized.");
-  }
-
-  protected void enableResourcePath() {
-    this.useResourcePath = true;
   }
 }

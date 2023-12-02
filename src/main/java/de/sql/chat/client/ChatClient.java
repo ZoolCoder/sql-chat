@@ -45,18 +45,17 @@ public class ChatClient {
    * @throws ChatAppException If an error occurs during client setup.
    */
   public void start(UserInputSource userInputSource) throws ChatAppException {
-    try {
-      setupClient();
+    new Thread(() -> {
+      try {
+        setupClient();
 
-      this.clientSession = ChatSessionFactory.createChatSession(ChatSenderType.CLIENT, clientSocket, userInputSource);
-      System.out.println("Connected to server. You can start typing messages.");
-      this.clientSession.start();
-    } catch (IOException e) {
-      LOGGER.error("Error during client setup: {}", e.getMessage());
-      throw new ChatAppException(ErrorCode.CLIENT_ERROR, "Client Error: " + e.getMessage());
-    } finally {
-      close();
-    }
+        this.clientSession = ChatSessionFactory.createChatSession(ChatSenderType.CLIENT, clientSocket, userInputSource);
+        System.out.println("Connected to server. You can start typing messages.");
+        this.clientSession.start();
+      } catch (IOException | ChatAppException e) {
+        LOGGER.error("Error during client setup: {}", e.getMessage());
+      }
+    }).start();
   }
 
   /**
@@ -140,5 +139,14 @@ public class ChatClient {
   public void sendMessage(String message) {
     LOGGER.debug("Sending message: {}", message);
     this.clientSession.sendMessage(message);
+  }
+
+  /**
+   * Checks if the chat client is currently running.
+   *
+   * @return true if the chat client is running, false otherwise.
+   */
+  public boolean isRunning() {
+    return this.clientSession != null && this.clientSession.isRunning();
   }
 }

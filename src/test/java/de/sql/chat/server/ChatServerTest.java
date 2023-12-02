@@ -2,10 +2,9 @@ package de.sql.chat.server;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import de.sql.chat.client.ChatClient;
 import de.sql.chat.session.EmptyUserInputSource;
-import java.io.IOException;
-import java.net.Socket;
-
+import de.sql.chat.util.TestUtils;
 import org.junit.jupiter.api.*;
 
 import de.sql.chat.exceptions.ChatAppException;
@@ -13,39 +12,31 @@ import de.sql.chat.exceptions.ChatAppException;
 public class ChatServerTest {
 
   private static ChatServer chatServer;
-  private static Socket clientSocket;
+  private static ChatClient chatClient;
 
   @BeforeAll
-  public static void setup() throws IOException, ChatAppException {
+  public static void setup() throws ChatAppException {
+    // Start the chat server
     chatServer = new ChatServer();
-    Thread serverThread = new Thread(() -> {
-      try {
-        chatServer.start(new EmptyUserInputSource());
-      } catch (ChatAppException e) {
-        e.printStackTrace();
-      }
-    });
-    serverThread.start();
-    // Wait for the server to start before creating the client socket
-    try {
-      Thread.sleep(1000); // Adjust the delay if needed
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+    chatServer.start(new EmptyUserInputSource());
+    System.out.println("Server started successfully!");
+    TestUtils.sleepForShortDuration(500);
 
-    // Create the client socket
-    clientSocket = new Socket("localhost", chatServer.getServerPort());
+    // Start the chat client
+    chatClient = new ChatClient(chatServer.getServerIP(), chatServer.getServerPort());
+    chatClient.start(new EmptyUserInputSource());
+    TestUtils.sleepForShortDuration(500);
   }
 
   @AfterAll
-  public static void cleanup() throws IOException {
-   // chatServer.close();
-    clientSocket.close();
+  public static void cleanup() throws ChatAppException {
+    chatServer.close();
+    chatClient.close();
   }
 
   @Test
-  void testStart() throws ChatAppException {
-    assertTrue(clientSocket.isConnected());
+  void testStart() {
+    assertTrue(chatClient.isRunning());
   }
 
   @Test

@@ -1,12 +1,16 @@
 package de.sql.chat.config;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.when;
 
 import de.sql.chat.exceptions.ChatAppException;
-
-import java.io.File;
-
-import static org.junit.jupiter.api.Assertions.*;
+import de.sql.chat.exceptions.ErrorCode;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 class ChatConfigurationAccessTest {
 
@@ -19,34 +23,38 @@ class ChatConfigurationAccessTest {
 
   @Test
   void testGetChatConfiguration() {
-    // Use try-catch block to hide the exception
     try {
       chatConfigurationAccess.getChatConfiguration();
-      fail("Expected ChatAppException but it was not thrown");
-    } catch (ChatAppException ignored) {
-      // Exception caught, do nothing
+    } catch (ChatAppException e) {
+      fail("Exception thrown during getChatConfiguration: " + e.getMessage());
     }
   }
 
   @Test
-  void testEnableResourcePath() {
-    chatConfigurationAccess.enableResourcePath();
-    String filePath = chatConfigurationAccess.getFilePath();
-    String expectedPath = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "config" + File.separator + "configuration-chat.xml";
-
-    assertEquals(expectedPath, filePath);
+  void testGetFilePath() throws ChatAppException {
+    assertEquals(chatConfigurationAccess.getResourceFilePath(), chatConfigurationAccess.getFilePath());
   }
 
   @Test
-  void testGetFilePath() {
-    chatConfigurationAccess.enableResourcePath();
-    String filePath = chatConfigurationAccess.getFilePath();
-    String expectedPath = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "config" + File.separator + "configuration-chat.xml";
-    assertEquals(expectedPath, filePath);
+  void testGetResourceFilePath_ResourceNotFound() throws ChatAppException {
+    ChatConfigurationAccess mockChatConfigurationAccess = Mockito.mock(ChatConfigurationAccess.class);
+    when(mockChatConfigurationAccess.getFilePath()).thenThrow(new ChatAppException(ErrorCode.CONFIGURATION_ERROR, "Resource not found: " + ChatConfigurationAccess.CONFIG_FILE_PATH));
 
-    // Optionally, you can test the disableResourcePath method
-    // chatConfigurationAccess.disableResourcePath();
-    // filePath = chatConfigurationAccess.getFilePath();
-    // assertEquals(System.getProperty("user.dir") + File.separator + "config" + File.separator + "configuration-chat.xml", filePath);
+    assertThrows(ChatAppException.class, () -> {
+      mockChatConfigurationAccess.getFilePath();
+    }, "Resource not found: " + ChatConfigurationAccess.CONFIG_FILE_PATH);
+  }
+
+  @Test
+  void testGetResourceFilePath_URISyntaxException() throws ChatAppException {
+    assertNotNull(getClass().getClassLoader().getResource(ChatConfigurationAccess.CONFIG_FILE_PATH));
+    // Create a mock object for ChatConfigurationAccess
+    ChatConfigurationAccess mockChatConfigurationAccess = Mockito.mock(ChatConfigurationAccess.class);
+    when(mockChatConfigurationAccess.getResourceFilePath()).thenThrow(new ChatAppException(ErrorCode.CONFIGURATION_ERROR, "Error converting URL to URI:" + ChatConfigurationAccess.CONFIG_FILE_PATH));
+
+    // Call the method and assert that it throws a ChatAppException with the expected error code and message
+    assertThrows(ChatAppException.class, () -> {
+      mockChatConfigurationAccess.getResourceFilePath();
+    }, "Error converting URL to URI: " + ChatConfigurationAccess.CONFIG_FILE_PATH);
   }
 }

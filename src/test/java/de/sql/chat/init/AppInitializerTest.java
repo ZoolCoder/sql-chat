@@ -13,7 +13,6 @@ public class AppInitializerTest {
   @BeforeAll
   public static void setup() {
     appInitializer = AppInitializer.getInstance();
-    appInitializer.enableResourcePath();
   }
 
   @Test

@@ -1,7 +1,6 @@
 package de.sql.chat.server;
 
 import de.sql.chat.exceptions.ChatAppException;
-import de.sql.chat.exceptions.ErrorCode;
 import de.sql.chat.localization.LocalizationBundle;
 import de.sql.chat.localization.LocalizedResourceManager;
 import de.sql.chat.session.ChatSession;
@@ -39,16 +38,18 @@ public class ChatServer {
    * @throws ChatAppException If an error occurs during server setup.
    */
   public void start(UserInputSource userInputSource) throws ChatAppException {
-    try {
-      setupServer();
-      acceptClientConnection();
+    // Start the server in a new thread
+    new Thread(() -> {
+      try {
+        setupServer();
+        acceptClientConnection();
 
-      serverSession = ChatSessionFactory.createChatSession(ChatSenderType.SERVER, clientSocket, userInputSource);
-      serverSession.start();
-    } catch (IOException e) {
-      LOGGER.error("Error during server setup: {}", e.getMessage());
-      throw new ChatAppException(ErrorCode.SERVER_ERROR, LocalizedResourceManager.getInstance().getMessage(LocalizationBundle.MESSAGES, "server.error") + ": " + e.getMessage());
-    }
+        serverSession = ChatSessionFactory.createChatSession(ChatSenderType.SERVER, clientSocket, userInputSource);
+        serverSession.start();
+      } catch (ChatAppException | IOException e) {
+        LOGGER.error("Error during server setup: {}", e.getMessage());
+      }
+    }).start();
   }
 
   /**
@@ -117,5 +118,9 @@ public class ChatServer {
    */
   public ChatSession getServerSession() {
     return serverSession;
+  }
+
+  public boolean isRunning() {
+    return serverSocket != null && !serverSocket.isClosed();
   }
 }
