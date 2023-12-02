@@ -6,11 +6,10 @@ import de.sql.chat.session.ChatSenderType;
 import de.sql.chat.session.ChatSession;
 import de.sql.chat.session.ChatSessionFactory;
 import de.sql.chat.session.UserInputSource;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.IOException;
 import java.net.Socket;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The ChatClient class represents a client that connects to a chat server
@@ -46,18 +45,28 @@ public class ChatClient {
    * @throws ChatAppException If an error occurs during client setup.
    */
   public void start(UserInputSource userInputSource) throws ChatAppException {
-    try {
-      LOGGER.info("Connecting to server {}:{}", serverIP, serverPort);
-      clientSocket = new Socket(serverIP, serverPort);
-      LOGGER.info("Connected to server. You can start typing messages.");
+    new Thread(() -> {
+      try {
+        setupClient();
 
-      this.clientSession = ChatSessionFactory.createChatSession(ChatSenderType.CLIENT, clientSocket, userInputSource);
-      System.out.println("Connected to server. You can start typing messages.");
-      this.clientSession.start();
-    } catch (IOException e) {
-      LOGGER.error("Error during client setup: {}", e.getMessage());
-      throw new ChatAppException(ErrorCode.CLIENT_ERROR, "Client Error: " + e.getMessage());
-    }
+        this.clientSession = ChatSessionFactory.createChatSession(ChatSenderType.CLIENT, clientSocket, userInputSource);
+        System.out.println("Connected to server. You can start typing messages.");
+        this.clientSession.start();
+      } catch (IOException | ChatAppException e) {
+        LOGGER.error("Error during client setup: {}", e.getMessage());
+      }
+    }).start();
+  }
+
+  /**
+   * Sets up the client socket.
+   *
+   * @throws IOException If an error occurs while setting up the server socket.
+   */
+  private void setupClient() throws IOException {
+    LOGGER.info("Connecting to server {}:{}", serverIP, serverPort);
+    clientSocket = new Socket(serverIP, serverPort);
+    LOGGER.info("Connected to server. You can start typing messages.");
   }
 
   /**
@@ -130,5 +139,14 @@ public class ChatClient {
   public void sendMessage(String message) {
     LOGGER.debug("Sending message: {}", message);
     this.clientSession.sendMessage(message);
+  }
+
+  /**
+   * Checks if the chat client is currently running.
+   *
+   * @return true if the chat client is running, false otherwise.
+   */
+  public boolean isRunning() {
+    return this.clientSession != null && this.clientSession.isRunning();
   }
 }

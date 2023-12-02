@@ -10,8 +10,7 @@ public enum ErrorCode {
   SERVER_ERROR("error.server"),
   CLIENT_ERROR("error.client"),
   SESSION_ERROR("error.session"),
-
-  COMMUNICATION_ERROR("error.communication");
+  CONFIGURATION_ERROR("error.configuration");
 
   private final String key;
 

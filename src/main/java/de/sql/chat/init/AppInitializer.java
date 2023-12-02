@@ -1,6 +1,7 @@
 package de.sql.chat.init;
 
-import de.sql.chat.configuration.ConfigurationManager;
+import de.sql.chat.config.ChatConfigurationAccess;
+import de.sql.chat.exceptions.ChatAppException;
 import java.util.Locale;
 import de.sql.chat.localization.LocalizedResourceManager;
 
@@ -19,43 +20,59 @@ import java.nio.file.Paths;
  */
 public class AppInitializer {
 
-    private static final Logger LOGGER = LogManager.getLogger(AppInitializer.class);
-    private static AppInitializer instance;
+  private static final Logger LOGGER = LogManager.getLogger(AppInitializer.class);
+  
+  /**
+   * Private constructor to enforce the singleton pattern.
+   */
+  private AppInitializer() {
+    // Private constructor to enforce singleton pattern
+  }
 
-    private AppInitializer() {
-        // Private constructor to prevent direct instantiation
-    }
+  /**
+    * A holder class for the singleton instance of AppInitializer.
+    */
+  private static class SingletonHolder {
+    private static final AppInitializer INSTANCE = new AppInitializer();
+  }
 
-    /**
-     * Retrieve the singleton instance of the application initializer.
-     *
-     * @return The singleton instance of AppInitializer
-     */
-    public static AppInitializer getInstance() {
-      if (instance == null) {
-        instance = new AppInitializer();
-      }
-      return instance;
-    }
+  /**
+   * Returns the instance of the AppInitializer class.
+   *
+   * @return The instance of the AppInitializer class.
+   */
+  public static AppInitializer getInstance() {
+    return AppInitializer.SingletonHolder.INSTANCE;
+  }
 
-    /**
-     * Initializes the application by setting up the necessary components and resources.
-     * This method should be called once at the start of the application.
-     */
-    public void initialize() {
-      // Initialize log4j2 configuration first to allow logging of other initialization steps
-      initLog4j2();
-      LOGGER.info("Starting application initialization...");
-      initLocalization();
-      LOGGER.info("Application initialization completed.");
-    }
+  /**
+   * Initializes the application by setting up the necessary components and resources.
+   * This method should be called once at the start of the application.
+   */
+  public void initialize() throws ChatAppException {
+    // Initialize log4j2 configuration first to allow logging of other initialization steps
+    initLog4j2();
+    LOGGER.info("Starting application initialization...");
 
-  private void initLocalization() {
+    initLocalization();
+    LOGGER.info("Application initialization completed.");
+  }
+
+  /**
+   * Initializes the localization resources for the chat application.
+   * @throws ChatAppException if an error occurs during initialization.
+   */
+  protected void initLocalization() throws ChatAppException {
     LOGGER.info("Initializing localization resources.");
-    LocalizedResourceManager.getInstance(new Locale(ConfigurationManager.getInstance().getChatConfiguration().getApplication().getLocal()));
+    Locale locale = new Locale(ChatConfigurationAccess.getInstance().getChatConfiguration().getApplication().getLocal());
+    LocalizedResourceManager.getInstance(locale);
     LOGGER.info("localization configuration initialized.");
   }
-  private void initLog4j2() {
+
+  /**
+   * Initializes the log4j2 configuration by setting the log4j2 configuration file path and reconfiguring the logger context.
+   */
+  protected void initLog4j2() {
     Path configPath = Paths.get(System.getProperty("user.dir") + "/config/log4j2.xml");
     System.setProperty("log4j.configurationFile", configPath.toUri().toString());
 
@@ -64,5 +81,4 @@ public class AppInitializer {
     context.reconfigure();
     LOGGER.info("log4j2 configuration initialized.");
   }
-
 }

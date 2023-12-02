@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bindings
+    xmlns="https://jakarta.ee/xml/ns/jaxb"
+    xmlns:xsi="http://www.w3.org/2000/10/XMLSchema-instance"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xjc="https://jakarta.ee/xml/ns/jaxb/xjc"
+    xsi:schemaLocation="https://jakarta.ee/xml/ns/jaxb https://jakarta.ee/xml/ns/jaxb/bindingschema_3_0.xsd http://www.w3.org/2001/XMLSchema http://www.w3.org/2001/XMLSchema.xsd"
+    version="3.0">
+
+    <globalBindings>
+        <serializable />
+    </globalBindings>
+
+</bindings>

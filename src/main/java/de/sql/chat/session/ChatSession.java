@@ -1,5 +1,9 @@
 package de.sql.chat.session;
 
+import static java.util.concurrent.CompletableFuture.delayedExecutor;
+import static java.util.concurrent.CompletableFuture.runAsync;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 import de.sql.chat.exceptions.ChatAppException;
 import de.sql.chat.exceptions.ErrorCode;
 
@@ -63,12 +67,7 @@ public class ChatSession implements AutoCloseable {
                 printReceivedMessages();
 
                 // Sleep for a short duration to avoid busy-waiting
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    LOGGER.debug("Thread interrupted during sleep.");
-                    Thread.currentThread().interrupt();
-                }
+                sleepForShortDuration(100);
             }
         } finally {
             userInputThread.interrupt();
@@ -88,13 +87,7 @@ public class ChatSession implements AutoCloseable {
                 }
 
                 // Sleep for a short duration to avoid busy-waiting
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    LOGGER.debug("Thread interrupted during sleep.");
-                    Thread.currentThread().interrupt();
-                    return;
-                }
+                sleepForShortDuration(100);
             }
         } catch (IOException e) {
             LOGGER.error("Error reading user input: {}", e.getMessage());
@@ -168,8 +161,18 @@ public class ChatSession implements AutoCloseable {
      */
     @Override
     public void close() throws IOException {
+        exitRequested = true;
         socket.close();
         LOGGER.info("Chat session closed.");
+    }
+
+     /**
+     * Checks if the chat session is still running.
+     *
+     * @return true if the chat session is running, false otherwise
+     */
+    public boolean isRunning() {
+        return !exitRequested;
     }
 
     /**
@@ -179,5 +182,21 @@ public class ChatSession implements AutoCloseable {
      */
     public List<String> getUserMessages() {
         return userMessages;
+    }
+
+    /**
+     * Clears the user messages in the chat session.
+     */
+    public void clearUserMessages() {
+        userMessages.clear();
+    }
+
+    /**
+     * Sleeps for a short duration in milliseconds.
+     *
+     * @param millis the duration to sleep in milliseconds
+     */
+    private void sleepForShortDuration(long millis) {
+        runAsync(() -> {}, delayedExecutor(millis, MILLISECONDS)).join();
     }
 }

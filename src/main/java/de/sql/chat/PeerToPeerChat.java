@@ -16,12 +16,22 @@ import org.apache.logging.log4j.Logger;
  */
 public class PeerToPeerChat {
   private static final Logger LOGGER = LogManager.getLogger(PeerToPeerChat.class);
-  public static void main(String[] args) {
-    
+  public static void main(String[] args) throws ChatAppException {
+    PeerToPeerChat chatApp = new PeerToPeerChat();
+    chatApp.run(args);
+  }
+
+  /**
+   * Runs the PeerToPeerChat application.
+   *
+   * @param args The command-line arguments passed to the application.
+   * @throws ChatAppException If an error occurs while running the application.
+   */
+  protected void run(String[] args) throws ChatAppException {
     // Initializes the application
     AppInitializer appInitializer = AppInitializer.getInstance();
     appInitializer.initialize();
-    
+
     String otherInstanceIP = null;
     int otherInstancePort = 0;
 
@@ -52,7 +62,7 @@ public class PeerToPeerChat {
    * @param serverPort The port on which the server is listening.
    * @throws ChatAppException If an error occurs during client setup.
    */
-  private static void startClient(String serverIP, int serverPort) throws ChatAppException {
+  protected void startClient(String serverIP, int serverPort) throws ChatAppException {
     LOGGER.info("Starting chat client with server IP: {} and port: {}", serverIP, serverPort);
     new ChatClient(serverIP, serverPort).start(new ScannerUserInputSource());
   }
@@ -62,7 +72,7 @@ public class PeerToPeerChat {
    *
    * @throws ChatAppException If an error occurs during server setup.
    */
-  private static void startServer() throws ChatAppException {
+  protected void startServer() throws ChatAppException {
     LOGGER.info("Starting chat server");
     new ChatServer().start(new ScannerUserInputSource());
   }
