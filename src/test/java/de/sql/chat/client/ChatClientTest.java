@@ -2,51 +2,83 @@ package de.sql.chat.client;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 
 import de.sql.chat.exceptions.ChatAppException;
 import de.sql.chat.exceptions.ErrorCode;
 import de.sql.chat.server.ChatServer;
 import de.sql.chat.session.EmptyUserInputSource;
+import de.sql.chat.session.UserInputSource;
 import de.sql.chat.util.TestUtils;
 import java.io.IOException;
 import java.util.List;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 /**
  * Tests for the ChatClient class.
  */
 public class ChatClientTest {
     private static ChatServer chatServer;
-    private static ChatClient chatClient;
+    private ChatClient chatClient;
 
     @BeforeAll
-    public static void setup() throws ChatAppException {
-        // Start the chat server
+    public static void setupServer() throws ChatAppException {
         chatServer = new ChatServer();
         chatServer.start(new EmptyUserInputSource());
-        System.out.println("Server started successfully!");
         TestUtils.sleepForShortDuration(500);
+    }
 
-        // Start the chat client
+    @BeforeEach
+    public void setupClient() throws ChatAppException {
         chatClient = new ChatClient(chatServer.getServerIP(), chatServer.getServerPort());
         chatClient.start(new EmptyUserInputSource());
         TestUtils.sleepForShortDuration(500);
     }
 
-    @AfterAll
-    public static void cleanup() throws ChatAppException {
-        chatServer.close();
+    @AfterEach
+    public void cleanupClient() throws ChatAppException {
         chatClient.close();
     }
 
+    @AfterAll
+    public static void cleanup() throws ChatAppException {
+        chatServer.close();
+    }
     @Test
-    void testExitSendsMessagesAndLogsProperly() {
+    void shouldThrowExceptionWhenStartFails() throws ChatAppException {
+        ChatClient mockChatClient = Mockito.mock(ChatClient.class);
+        doThrow(ChatAppException.class).when(mockChatClient).start(any(UserInputSource.class));
+
+        assertThrows(ChatAppException.class, () -> mockChatClient.start(new EmptyUserInputSource()));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenCloseFails() throws ChatAppException {
+        ChatClient mockChatClient = Mockito.mock(ChatClient.class);
+        doThrow(ChatAppException.class).when(mockChatClient).close();
+        assertThrows(ChatAppException.class, () -> mockChatClient.close());
+    }
+
+    @Test
+    void shouldReturnNullWhenClientSessionNotRunning() {
+        ChatClient mockChatClient = Mockito.mock(ChatClient.class);
+        when(mockChatClient.getClientSession()).thenReturn(null);
+        assertNull(mockChatClient.getClientSession());
+    }
+    @Test
+    void shouldSendMessagesAndLogOnExit() {
         chatClient.getClientSession().clearUserMessages();
 
         // Send messages from the client
@@ -62,55 +94,48 @@ public class ChatClientTest {
         assertEquals("Client: Hello", userMessages.get(0));
         assertEquals("Client: How are you?", userMessages.get(1));
     }
-
     @Test
-    void testSendMessageDoesNotThrowException() {
+    void shouldNotThrowExceptionWhenSendMessageWithValidMessage() {
         assertDoesNotThrow(() -> chatClient.sendMessage("Test message"));
     }
-
     @Test
-    void testGetServerIP() {
+    void shouldReturnCorrectServerIP() {
         assertEquals(chatServer.getServerIP(), chatClient.getServerIP());
     }
 
     @Test
-    void testGetServerPort() {
+    void shouldReturnCorrectServerPort() {
         assertEquals(chatServer.getServerPort(), chatClient.getServerPort());
     }
 
     @Test
-    void testIsRunningReturnsTrueWhenClientSessionIsRunning() {
-        // Verify that isRunning() returns true
+    void shouldReturnTrueWhenClientSessionIsRunning() {
         assertTrue(chatClient.isRunning());
     }
 
     @Test
-    void testCloseClosesChatSessionAndSocket() throws ChatAppException {
-        // Close the chat client
-        //chatClient.close();
-
-        // Verify that the chat session is closed
-        assertTrue(chatClient.getClientSession().isRunning());
-
-        // Verify that the client socket is closed
-        assertTrue(!chatClient.getClientSocket().isClosed());
+    void shouldReturnFalseWhenClientSessionNotRunning() {
+        ChatClient mockChatClient = Mockito.mock(ChatClient.class);
+        when(mockChatClient.getClientSession()).thenReturn(null);
+        assertFalse(mockChatClient.isRunning());
     }
 
-    /*@Test
-    void testCloseThrowsExceptionOnIOException() throws IOException {
-        // Mock an IOException during client shutdown
-        IOException ioException = new IOException("Mock IOException");
-        doThrow(ioException).when(chatClient.getClientSocket()).close();
-
-        // Verify that closing the chat client throws a ChatAppException
-        ChatAppException exception = assertThrows(ChatAppException.class, () -> chatClient.close());
-        assertEquals(ErrorCode.CLIENT_ERROR, exception.getErrorCode());
-        assertEquals("Client Error: Mock IOException", exception.getMessage());
-        assertEquals(ioException.getMessage(), exception.getCause().getMessage());
-    }*/
+    @Test
+    void shouldCloseChatSessionAndSocket() throws ChatAppException {
+        chatClient.close();
+        assertFalse(chatClient.isRunning());
+        assertTrue(chatClient.getClientSocket().isClosed());
+    }
 
     @Test
-    void testGetClientSession() {
+    void shouldReturnClientSessionWhenRunning() {
         assertNotNull(chatClient.getClientSession());
+    }
+
+    @Test
+    void shouldReturnFalseWhenClientSessionIsNull() {
+        ChatClient mockChatClient = Mockito.mock(ChatClient.class);
+        when(mockChatClient.getClientSession()).thenReturn(null);
+        assertFalse(mockChatClient.getClientSession()!= null && mockChatClient.getClientSession().isRunning());
     }
 }

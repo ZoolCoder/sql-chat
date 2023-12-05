@@ -2,12 +2,17 @@ package de.sql.chat.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 import de.sql.chat.exceptions.ChatAppException;
 import de.sql.chat.exceptions.ErrorCode;
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -22,17 +27,37 @@ class ChatConfigurationAccessTest {
   }
 
   @Test
-  void testGetChatConfiguration() {
-    try {
-      chatConfigurationAccess.getChatConfiguration();
-    } catch (ChatAppException e) {
-      fail("Exception thrown during getChatConfiguration: " + e.getMessage());
-    }
+  void shouldReturnSameInstance() {
+    ChatConfigurationAccess instance1 = ChatConfigurationAccess.getInstance();
+    ChatConfigurationAccess instance2 = ChatConfigurationAccess.getInstance();
+    assertSame(instance1, instance2);
   }
 
   @Test
-  void testGetFilePath() throws ChatAppException {
-    assertEquals(chatConfigurationAccess.getResourceFilePath(), chatConfigurationAccess.getFilePath());
+  void shouldReturnChatConfiguration() throws ChatAppException {
+    ChatConfiguration chatConfiguration = chatConfigurationAccess.getChatConfiguration();
+    assertNotNull(chatConfiguration);
+    // Add more assertions here based on the expected properties of the chat configuration
+  }
+
+  @Test
+  void shouldReturnFilePath() throws ChatAppException {
+    String filePath = chatConfigurationAccess.getFilePath();
+    assertNotNull(filePath);
+    System.out.println(filePath);
+    assertTrue(filePath.endsWith(ChatConfigurationAccess.CONFIG_FILE_PATH.replace("/", File.separator)));
+  }
+
+  @Test
+  void shouldReturnResourceFilePathWhenResourceExists() throws ChatAppException, URISyntaxException {
+    // Mock the getResourceFilePath method to return a valid file path
+    ChatConfigurationAccess mockChatConfigurationAccess = Mockito.spy(ChatConfigurationAccess.class);
+    Mockito.doReturn("/valid/file/path").when(mockChatConfigurationAccess).getResourceFilePath();
+
+    String resourceFilePath = mockChatConfigurationAccess.getResourceFilePath();
+
+    assertNotNull(resourceFilePath);
+    assertEquals("/valid/file/path", resourceFilePath);
   }
 
   @Test

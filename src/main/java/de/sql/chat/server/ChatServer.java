@@ -1,6 +1,7 @@
 package de.sql.chat.server;
 
 import de.sql.chat.exceptions.ChatAppException;
+import de.sql.chat.exceptions.ErrorCode;
 import de.sql.chat.localization.LocalizationBundle;
 import de.sql.chat.localization.LocalizedResourceManager;
 import de.sql.chat.session.ChatSession;
@@ -79,7 +80,7 @@ public class ChatServer {
   /**
    * Closes the server socket and client socket.
    */
-  public void close() {
+  public void close() throws ChatAppException {
     try {
       if (clientSocket != null) {
         clientSocket.close();
@@ -90,6 +91,7 @@ public class ChatServer {
       }
     } catch (IOException e) {
       LOGGER.error("Error during server socket closure: {}", e.getMessage());
+      throw new ChatAppException(ErrorCode.SERVER_ERROR, "Server Error: " + e.getMessage());
     }
   }
 

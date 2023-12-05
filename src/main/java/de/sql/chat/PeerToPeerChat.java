@@ -35,7 +35,7 @@ public class PeerToPeerChat {
     String otherInstanceIP = null;
     int otherInstancePort = 0;
 
-    if (args.length == 2 && args[0].equals("--other_instance")) {
+    if (args!= null && args.length == 2 && args[0].equals("--other_instance")) {
       String[] parts = args[1].split(":");
       if (parts.length == 2) {
         otherInstanceIP = parts[0];
@@ -52,6 +52,7 @@ public class PeerToPeerChat {
     } catch (ChatAppException e) {
       LOGGER.error("Chat Application Error: {}", e.getMessage());
       System.err.println("Chat Application Error: " + e.getMessage());
+      throw e;
     }
   }
 
